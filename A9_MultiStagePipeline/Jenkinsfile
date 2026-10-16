@@ -1,4 +1,4 @@
-
+```groovy
 pipeline {
     agent any
 
@@ -6,20 +6,22 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Installing dependencies...'
-                sh '''
-                    python3 -m venv venv
-                    ./venv/bin/pip install --upgrade pip
-                    ./venv/bin/pip install -r requirements.txt
-                '''
+                dir('A9_MultiStagePipeline') {
+                    sh '''
+                        python3 -m venv venv
+                        ./venv/bin/pip install --upgrade pip
+                        ./venv/bin/pip install -r requirements.txt
+                    '''
+                }
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running unit tests...'
-                sh '''
-                    ./venv/bin/python -m unittest discover -s .
-                '''
+                dir('A9_MultiStagePipeline') {
+                    sh './venv/bin/python -m unittest discover -s .'
+                }
             }
         }
 
@@ -30,8 +32,11 @@ pipeline {
                     rm -rf "${WORKSPACE}/python-app-deploy"
                     mkdir -p "${WORKSPACE}/python-app-deploy"
 
-                    cp app.py "${WORKSPACE}/python-app-deploy/"
-                    cp requirements.txt "${WORKSPACE}/python-app-deploy/"
+                    cp "${WORKSPACE}/A9_MultiStagePipeline/app.py" \
+                       "${WORKSPACE}/python-app-deploy/"
+
+                    cp "${WORKSPACE}/A9_MultiStagePipeline/requirements.txt" \
+                       "${WORKSPACE}/python-app-deploy/"
                 '''
             }
         }
@@ -48,7 +53,7 @@ pipeline {
                         fi
                     fi
 
-                    nohup "${WORKSPACE}/venv/bin/python" \
+                    nohup "${WORKSPACE}/A9_MultiStagePipeline/venv/bin/python" \
                         "${WORKSPACE}/python-app-deploy/app.py" \
                         > "${WORKSPACE}/python-app-deploy/app.log" 2>&1 &
 
@@ -63,7 +68,7 @@ pipeline {
             steps {
                 echo 'Testing deployed application...'
                 sh '''
-                    ./venv/bin/python - <<'PY'
+                    "${WORKSPACE}/A9_MultiStagePipeline/venv/bin/python" - <<'PY'
 import urllib.request
 
 url = "http://127.0.0.1:5000/"
@@ -92,4 +97,4 @@ PY
         }
     }
 }
-
+```
