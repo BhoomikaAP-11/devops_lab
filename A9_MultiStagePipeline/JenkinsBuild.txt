@@ -1,0 +1,133 @@
+Started by user unknown or anonymous
+Obtained A9_MultiStagePipeline/Jenkinsfile from git https://github.com/BhoomikaAP-11/devops_lab.git
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/Python-MultiStage-Pipeline
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/Python-MultiStage-Pipeline/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/BhoomikaAP-11/devops_lab.git # timeout=10
+Fetching upstream changes from https://github.com/BhoomikaAP-11/devops_lab.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- https://github.com/BhoomikaAP-11/devops_lab.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision af2a53cb69bdf8bb9517090a34f5d3bb18c8a373 (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f af2a53cb69bdf8bb9517090a34f5d3bb18c8a373 # timeout=10
+Commit message: "Add Werkzeug dependency to requirements.txt"
+ > git rev-list --no-walk 40ade141962272fd74d2a96fa8d61520bf2f9cf1 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Build)
+[Pipeline] echo
+Installing dependencies...
+[Pipeline] dir
+Running in /var/jenkins_home/workspace/Python-MultiStage-Pipeline/A9_MultiStagePipeline
+[Pipeline] {
+[Pipeline] sh
++ python3 -m venv venv
++ ./venv/bin/pip install --upgrade pip
+Requirement already satisfied: pip in ./venv/lib/python3.13/site-packages (26.2.1)
++ ./venv/bin/pip install -r requirements.txt
+Requirement already satisfied: flask==2.1.2 in ./venv/lib/python3.13/site-packages (from -r requirements.txt (line 1)) (2.1.2)
+Collecting Werkzeug==2.1.2 (from -r requirements.txt (line 2))
+  Using cached Werkzeug-2.1.2-py3-none-any.whl.metadata (4.4 kB)
+Requirement already satisfied: Jinja2>=3.0 in ./venv/lib/python3.13/site-packages (from flask==2.1.2->-r requirements.txt (line 1)) (3.1.6)
+Requirement already satisfied: itsdangerous>=2.0 in ./venv/lib/python3.13/site-packages (from flask==2.1.2->-r requirements.txt (line 1)) (2.2.0)
+Requirement already satisfied: click>=8.0 in ./venv/lib/python3.13/site-packages (from flask==2.1.2->-r requirements.txt (line 1)) (8.5.0)
+Requirement already satisfied: MarkupSafe>=2.0 in ./venv/lib/python3.13/site-packages (from Jinja2>=3.0->flask==2.1.2->-r requirements.txt (line 1)) (3.0.4)
+Using cached Werkzeug-2.1.2-py3-none-any.whl (224 kB)
+Installing collected packages: Werkzeug
+  Attempting uninstall: Werkzeug
+    Found existing installation: Werkzeug 3.1.9
+    Uninstalling Werkzeug-3.1.9:
+      Successfully uninstalled Werkzeug-3.1.9
+Successfully installed Werkzeug-2.1.2
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test)
+[Pipeline] echo
+Running unit tests...
+[Pipeline] dir
+Running in /var/jenkins_home/workspace/Python-MultiStage-Pipeline/A9_MultiStagePipeline
+[Pipeline] {
+[Pipeline] sh
++ ./venv/bin/python -m unittest discover -s .
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.076s
+
+OK
+Hello, Jenkins Multi-Stage Pipeline!
+[Pipeline] }
+[Pipeline] // dir
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Deploy)
+[Pipeline] echo
+Deploying application...
+[Pipeline] sh
++ rm -rf /var/jenkins_home/workspace/Python-MultiStage-Pipeline/python-app-deploy
++ mkdir -p /var/jenkins_home/workspace/Python-MultiStage-Pipeline/python-app-deploy
++ cp /var/jenkins_home/workspace/Python-MultiStage-Pipeline/A9_MultiStagePipeline/app.py /var/jenkins_home/workspace/Python-MultiStage-Pipeline/python-app-deploy/
++ cp /var/jenkins_home/workspace/Python-MultiStage-Pipeline/A9_MultiStagePipeline/requirements.txt /var/jenkins_home/workspace/Python-MultiStage-Pipeline/python-app-deploy/
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Run Application)
+[Pipeline] echo
+Running application...
+[Pipeline] sh
++ [ -f /var/jenkins_home/workspace/Python-MultiStage-Pipeline/python-app-deploy/app.pid ]
++ echo 919
++ sleep 3
++ nohup /var/jenkins_home/workspace/Python-MultiStage-Pipeline/A9_MultiStagePipeline/venv/bin/python /var/jenkins_home/workspace/Python-MultiStage-Pipeline/python-app-deploy/app.py
++ cat /var/jenkins_home/workspace/Python-MultiStage-Pipeline/python-app-deploy/app.log
+ * Serving Flask app 'app' (lazy loading)
+ * Environment: production
+   WARNING: This is a development server. Do not use it in a production deployment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on all addresses (0.0.0.0)
+   WARNING: This is a development server. Do not use it in a production deployment.
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.17.0.2:5000 (Press CTRL+C to quit)
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test Application)
+[Pipeline] echo
+Testing deployed application...
+[Pipeline] sh
++ /var/jenkins_home/workspace/Python-MultiStage-Pipeline/A9_MultiStagePipeline/venv/bin/python -
+HTTP Status: 200
+Response: Hello, Jenkins Multi-Stage Pipeline!
+Application test passed!
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] echo
+Pipeline completed successfully!
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
