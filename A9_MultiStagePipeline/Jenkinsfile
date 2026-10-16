@@ -1,14 +1,12 @@
+```groovy
 pipeline {
     agent any
 
     stages {
-
         stage('Build') {
             steps {
                 echo 'Installing dependencies...'
                 sh '''
-                    cd Assignment9
-
                     python3 -m venv venv
                     ./venv/bin/pip install --upgrade pip
                     ./venv/bin/pip install -r requirements.txt
@@ -20,7 +18,6 @@ pipeline {
             steps {
                 echo 'Running unit tests...'
                 sh '''
-                    cd Assignment9
                     ./venv/bin/python -m unittest discover -s .
                 '''
             }
@@ -30,14 +27,11 @@ pipeline {
             steps {
                 echo 'Deploying application...'
                 sh '''
-                    rm -rf ${WORKSPACE}/python-app-deploy
-                    mkdir -p ${WORKSPACE}/python-app-deploy
+                    rm -rf "${WORKSPACE}/python-app-deploy"
+                    mkdir -p "${WORKSPACE}/python-app-deploy"
 
-                    cp Assignment9/app.py \
-                       ${WORKSPACE}/python-app-deploy/
-
-                    cp Assignment9/requirements.txt \
-                       ${WORKSPACE}/python-app-deploy/
+                    cp app.py "${WORKSPACE}/python-app-deploy/"
+                    cp requirements.txt "${WORKSPACE}/python-app-deploy/"
                 '''
             }
         }
@@ -48,22 +42,19 @@ pipeline {
                 sh '''
                     if [ -f "${WORKSPACE}/python-app-deploy/app.pid" ]; then
                         PID=$(cat "${WORKSPACE}/python-app-deploy/app.pid")
-
                         if kill -0 "$PID" 2>/dev/null; then
                             kill "$PID" || true
                             sleep 2
                         fi
                     fi
 
-                    nohup ${WORKSPACE}/Assignment9/venv/bin/python \
-                        ${WORKSPACE}/python-app-deploy/app.py \
-                        > ${WORKSPACE}/python-app-deploy/app.log 2>&1 &
+                    nohup "${WORKSPACE}/venv/bin/python" \
+                        "${WORKSPACE}/python-app-deploy/app.py" \
+                        > "${WORKSPACE}/python-app-deploy/app.log" 2>&1 &
 
-                    echo $! > ${WORKSPACE}/python-app-deploy/app.pid
-
+                    echo $! > "${WORKSPACE}/python-app-deploy/app.pid"
                     sleep 3
-
-                    cat ${WORKSPACE}/python-app-deploy/app.log
+                    cat "${WORKSPACE}/python-app-deploy/app.log"
                 '''
             }
         }
@@ -72,11 +63,10 @@ pipeline {
             steps {
                 echo 'Testing deployed application...'
                 sh '''
-                    ./Assignment9/venv/bin/python - <<'PY'
+                    ./venv/bin/python - <<'PY'
 import urllib.request
 
 url = "http://127.0.0.1:5000/"
-
 response = urllib.request.urlopen(url)
 body = response.read().decode()
 
@@ -97,9 +87,9 @@ PY
         success {
             echo 'Pipeline completed successfully!'
         }
-
         failure {
             echo 'Pipeline failed. Check the logs for more details.'
         }
     }
 }
+```
